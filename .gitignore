@@ -1,0 +1,7 @@
+app/objs
+.vscode
+bin
+lib
+lib64
+gateway-opcua
+rticonnextdds-gateway_opcua

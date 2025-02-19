@@ -1,0 +1,95 @@
+<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://community.rti.com/schema/7.3.0/rti_dds_opcua_service.xsd">
+  <types>
+    <struct name="PLCcontrolType">
+      <member name="lampID" type="long" key="true"/>
+      <member name="count_r" type="boolean"/>
+      <member name="value_r" type="float"/>
+    </struct>
+  </types>
+
+  <ddsopcua_service name="PLCcontrolService">
+    
+    <opcua_connection name="PLCServerConnection" server_endpoint_url="opc.tcp://192.168.1.220:4840">
+      <timeout>5000</timeout>
+    </opcua_connection>
+    
+    <domain_participant name="PLCDomainParticipant" domain_id="6">
+      <register_type name="PLCcontrol" type_ref="PLCcontrolType"/>
+    </domain_participant>
+
+    <opcua_to_dds_bridge name="PLCControlBridge">
+      <service_set opcua_connection_ref="PLCServerConnection" domain_participant_ref="PLCDomainParticipant">
+
+        <!-- Enable the Attribute Service Set that allows remote applications to perform Read/Write operations through the OPC UA/DDS Gateway. -->
+        <attribute_service_set>
+          <enabled>false</enabled>
+        </attribute_service_set>
+      </service_set>
+
+      <subscription name="PLCControlSubscription">
+        <opcua_input name="PLCOPCInput" opcua_connection_ref="PLCServerConnection">
+                    
+          <subscription_protocol>
+            <requested_publishing_interval>10</requested_publishing_interval>
+            <publishing_enabled>true</publishing_enabled>
+          </subscription_protocol>
+
+          <monitored_items>                     
+            <node_attribute dds_topic_field_name="count_r">
+              <node_id>
+                <namespace_index>6</namespace_index>
+                <string_identifier>Count_R</string_identifier>
+              </node_id>
+              <attribute_id>VALUE</attribute_id>
+            </node_attribute>            
+            <node_attribute dds_topic_field_name="intensity">
+              <node_id>
+                <namespace_index>6</namespace_index>
+                <string_identifier>intensity</string_identifier>
+              </node_id>
+              <attribute_id>VALUE</attribute_id>
+            </node_attribute>	     
+          </monitored_items>
+        </opcua_input>
+
+        <dds_output name="PLCDDSOutput" domain_participant_ref="PLCDomainParticipant">
+          <topic_name>PLCMonitorTopic</topic_name>
+          <registered_type_name>PLCcontrol</registered_type_name>
+        </dds_output>
+
+      </subscription>
+
+      <publication name="PLCControlPublication">
+        <dds_input name="PLCDDSInput" domain_participant_ref="PLCDomainParticipant">
+          <topic_name>PLCControlTopic</topic_name>
+          <registered_type_name>PLCcontrol</registered_type_name>
+        </dds_input>
+        
+        <opcua_output name="PLCOPCOutput" opcua_connection_ref="PLCServerConnection">
+           <node_attribute dds_topic_field_name="count_r">
+              <node_id>
+                <namespace_index>6</namespace_index>
+                <string_identifier>Count_R</string_identifier>
+              </node_id>
+              <attribute_id>VALUE</attribute_id>
+            </node_attribute>            
+            <node_attribute dds_topic_field_name="value_r">
+              <node_id>
+                <namespace_index>6</namespace_index>
+                <string_identifier>Value_R</string_identifier>
+              </node_id>
+              <attribute_id>VALUE</attribute_id>
+            </node_attribute>	    
+            <node_attribute dds_topic_field_name="value_rw">
+              <node_id>
+                <namespace_index>6</namespace_index>
+                <string_identifier>Value_RW</string_identifier>
+              </node_id>
+              <attribute_id>VALUE</attribute_id>
+            </node_attribute>
+         </opcua_output>
+
+      </publication>
+    </opcua_to_dds_bridge>
+  </ddsopcua_service>
+</dds>

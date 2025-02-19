@@ -1,2 +1,2 @@
-# smd-plc-gui
-GUI for controlling PLC driver
+# smd-plc
+RTI connext based PLC module 

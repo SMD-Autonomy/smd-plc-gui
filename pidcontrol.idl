@@ -1,0 +1,6 @@
+@appendable
+struct LampControl {
+    @key long lampID;
+    boolean count_r;
+    float intensity;
+};
